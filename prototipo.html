@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REAL App - Prototipo Interactivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #14b8a6;
+            --warning: #facc15;
+            --danger: #ef4444;
+            --bg: #020617;
+            --card: #0f172a;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* FRAME DEL CELULAR */
+        .phone-frame {
+            width: 360px;
+            height: 740px;
+            background: #000;
+            border: 12px solid #1e293b;
+            border-radius: 45px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        /* 1. ESCANEO */
+        .feed-item {
+            position: relative;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: var(--card);
+        }
+
+        .feed-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            filter: grayscale(0.5);
+            transition: 0.5s;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 184, 166, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .scanning .scan-overlay { opacity: 1; }
+        
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            position: absolute;
+            box-shadow: 0 0 15px var(--primary);
+            animation: moveScan 2s infinite linear;
+            display: none;
+        }
+
+        @keyframes moveScan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        /* 2. ETIQUETADO */
+        .label {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: none;
+        }
+
+        .label-edited { background: var(--danger); color: white; }
+        .label-real { background: var(--primary); color: #000; }
+
+        /* 3. INTERVENCIÓN (Pausa Digital) */
+        #intervention-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.95);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .breath-circle {
+            width: 150px;
+            height: 150px;
+            background: rgba(20, 184, 166, 0.2);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: breathe 8s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); background: rgba(20, 184, 166, 0.1); }
+            50% { transform: scale(1.5); background: rgba(20, 184, 166, 0.4); }
+        }
+
+        /* BOTONES Y UI */
+        .nav-header { padding: 20px; font-weight: 800; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; }
+        .btn-scan { background: var(--primary); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; margin: 15px; }
+        .content { flex-grow: 1; overflow-y: auto; padding: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div class="screen">
+        <div class="nav-header">
+            <span>REAL APP</span>
+            <i class="fa-solid fa-shield-heart" style="color: var(--primary);"></i>
+        </div>
+
+        <button class="btn-scan" onclick="startDigitalProcess()">
+            <i class="fa-solid fa-magnifying-glass-chart"></i> INICIAR ESCANEO ÉTICO
+        </button>
+
+        <div class="content" id="feed-container">
+            <div class="feed-item" id="item1">
+                <div class="scan-line"></div>
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400" class="feed-img">
+                <div class="scan-overlay">Analizando...</div>
+                <span class="label label-edited" id="label1">Altamente Editado</span>
+            </div>
+            <div class="feed-item" id="item2">
+                <div class="scan-line"></div>
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400" class="feed-img">
+                <div class="scan-overlay">Analizando...</div>
+                <span class="label label-real" id="label2">Contenido Real</span>
+            </div>
+        </div>
+
+        <div id="intervention-screen">
+            <i class="fa-solid fa-wind" style="font-size: 40px; color: var(--primary);"></i>
+            <h2 style="margin-top: 20px;">Pausa de Bienestar</h2>
+            <p style="font-size: 14px; color: #94a3b8;">Detectamos fatiga por comparación. Vamos a respirar juntos.</p>
+            
+            <div class="breath-circle">
+                <span id="breath-text" style="font-weight: 800; color: var(--primary);">Inhala</span>
+            </div>
+
+            <p id="timer" style="font-weight: 600;">Regresando en 8s...</p>
+            <button class="btn-scan" style="width: 100%; margin: 0; margin-top: 20px;" onclick="closeIntervention()">Continuar con consciencia</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function startDigitalProcess() {
+        // 1. ESCANEO
+        const lines = document.querySelectorAll('.scan-line');
+        const overlays = document.querySelectorAll('.scan-overlay');
+        const imgs = document.querySelectorAll('.feed-img');
+
+        lines.forEach(l => l.style.display = 'block');
+        overlays.forEach(o => o.style.opacity = '1');
+
+        setTimeout(() => {
+            // 2. ETIQUETADO
+            lines.forEach(l => l.style.display = 'none');
+            overlays.forEach(o => o.style.opacity = '0');
+            imgs.forEach(img => img.style.filter = 'grayscale(0)');
+            
+            document.getElementById('label1').style.display = 'block';
+            document.getElementById('label2').style.display = 'block';
+
+            // 3. INTERVENCIÓN (Activada por detectar contenido "Altamente Editado")
+            setTimeout(() => {
+                showIntervention();
+            }, 1500);
+        }, 3000);
+    }
+
+    function showIntervention() {
+        document.getElementById('intervention-screen').style.display = 'flex';
+        let step = 0;
+        const breathTxt = document.getElementById('breath-text');
+        
+        setInterval(() => {
+            step++;
+            breathTxt.innerText = step % 2 === 0 ? "Inhala" : "Exhala";
+        }, 4000);
+    }
+
+    function closeIntervention() {
+        document.getElementById('intervention-screen').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
